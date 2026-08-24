@@ -1,0 +1,33 @@
+name: Generate AI Changelog
+
+on:
+  push:
+    branches:
+      - main # Passe den Branch an, falls nötig (z. B. master)
+
+jobs:
+  changelog:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Wichtig, damit die Action Änderungen pushen darf
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Volle Historie für Git-Diffs laden
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: pip install requests
+
+      - name: Run Changelog Generator
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COMMIT_SHA: ${{ github.sha }}
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: python .github/scripts/generate_changelog.py
